@@ -1,0 +1,262 @@
+"use client";
+
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Card, dealCards, findWinner } from "@/lib/deck";
+import PlayerSlot from "./PlayerSlot";
+import confetti from "canvas-confetti";
+
+interface RoundResult {
+  round: number;
+  winner: number;
+  card: Card;
+}
+
+export default function GameBoard() {
+  const [playerCount, setPlayerCount] = useState(6);
+  const [cards, setCards] = useState<(Card | null)[]>([]);
+  const [revealed, setRevealed] = useState<boolean[]>([]);
+  const [winner, setWinner] = useState<number | null>(null);
+  const [isDealt, setIsDealt] = useState(false);
+  const [history, setHistory] = useState<RoundResult[]>([]);
+  const [roundNumber, setRoundNumber] = useState(0);
+  const [dealKey, setDealKey] = useState(0);
+  const confettiFired = useRef(false);
+
+  const allRevealed = revealed.length > 0 && revealed.every(Boolean);
+
+  useEffect(() => {
+    if (!allRevealed || confettiFired.current) return;
+
+    const winnerIndex = findWinner(cards);
+    if (winnerIndex === -1) return;
+
+    setWinner(winnerIndex);
+    confettiFired.current = true;
+
+    const winnerCard = cards[winnerIndex];
+    if (winnerCard) {
+      setHistory((prev) => [
+        { round: roundNumber, winner: winnerIndex + 1, card: winnerCard },
+        ...prev,
+      ].slice(0, 20));
+    }
+
+    const duration = 2000;
+    const end = Date.now() + duration;
+    const frame = () => {
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.7 },
+        colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
+      });
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.7 },
+        colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
+      });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, [allRevealed, cards, roundNumber]);
+
+  const handleDeal = useCallback(() => {
+    const dealt = dealCards(playerCount);
+    setCards(dealt);
+    setRevealed(new Array(playerCount).fill(false));
+    setWinner(null);
+    setIsDealt(true);
+    confettiFired.current = false;
+    setRoundNumber((prev) => prev + 1);
+    setDealKey((prev) => prev + 1);
+  }, [playerCount]);
+
+  const handleReveal = useCallback(
+    (index: number) => {
+      if (revealed[index]) return;
+      setRevealed((prev) => {
+        const next = [...prev];
+        next[index] = true;
+        return next;
+      });
+    },
+    [revealed]
+  );
+
+  const handleRevealAll = useCallback(() => {
+    setRevealed(new Array(playerCount).fill(true));
+  }, [playerCount]);
+
+  const handlePlayerCountChange = useCallback((count: number) => {
+    setPlayerCount(count);
+    setCards([]);
+    setRevealed([]);
+    setWinner(null);
+    setIsDealt(false);
+    confettiFired.current = false;
+  }, []);
+
+  const gridCols =
+    playerCount <= 2
+      ? "grid-cols-2"
+      : playerCount <= 4
+        ? "grid-cols-2 sm:grid-cols-4"
+        : playerCount <= 6
+          ? "grid-cols-2 sm:grid-cols-3"
+          : "grid-cols-2 sm:grid-cols-4";
+
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 pb-12 relative z-10">
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8">
+        {/* Player count selector */}
+        <div className="flex items-center gap-3">
+          <label
+            htmlFor="player-count"
+            className="text-sm font-semibold"
+            style={{ color: "rgba(240, 208, 96, 0.9)" }}
+          >
+            Jugadores:
+          </label>
+          <div className="flex gap-1">
+            {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <button
+                key={n}
+                onClick={() => handlePlayerCountChange(n)}
+                className={`
+                  w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200
+                  ${playerCount === n
+                    ? "bg-gradient-to-b from-yellow-500 to-yellow-700 text-black shadow-lg scale-110"
+                    : "bg-black/30 text-white/70 hover:bg-black/50 hover:text-white border border-white/10"
+                  }
+                `}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleDeal}
+            className="btn-pulse px-6 py-2.5 rounded-xl font-bold text-sm sm:text-base
+              bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-700
+              text-black shadow-lg hover:from-yellow-400 hover:to-yellow-600
+              active:scale-95 transition-all duration-200
+              border border-yellow-400/50"
+          >
+            🎴 Repartir
+          </button>
+
+          {isDealt && !allRevealed && (
+            <button
+              onClick={handleRevealAll}
+              className="px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base
+                bg-gradient-to-b from-emerald-600 to-emerald-800
+                text-white shadow-lg hover:from-emerald-500 hover:to-emerald-700
+                active:scale-95 transition-all duration-200
+                border border-emerald-400/30"
+            >
+              👁 Revelar Todas
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Winner banner */}
+      {winner !== null && allRevealed && (
+        <div className="winner-banner mb-6 text-center">
+          <div
+            className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
+              bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600
+              text-black shadow-2xl border-2 border-yellow-300"
+          >
+            🏆 ¡Jugador {winner + 1} Gana! 🏆
+          </div>
+          <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
+            con {cards[winner]?.rank}{" "}
+            {cards[winner]?.suit === "hearts"
+              ? "♥"
+              : cards[winner]?.suit === "diamonds"
+                ? "♦"
+                : cards[winner]?.suit === "clubs"
+                  ? "♣"
+                  : "♠"}
+          </p>
+        </div>
+      )}
+
+      {/* Game area */}
+      {!isDealt ? (
+        <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
+          <div className="text-6xl sm:text-8xl mb-2 select-none">🃏</div>
+          <p className="text-lg sm:text-xl font-semibold" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
+            Selecciona jugadores y haz clic en Repartir
+          </p>
+          <p className="text-sm" style={{ color: "rgba(240, 230, 210, 0.5)" }}>
+            La carta más alta gana la ronda
+          </p>
+        </div>
+      ) : (
+        <div
+          key={dealKey}
+          className={`grid ${gridCols} gap-4 sm:gap-6 justify-items-center max-w-3xl mx-auto`}
+        >
+          {cards.map((card, index) => (
+            <PlayerSlot
+              key={`${dealKey}-${index}`}
+              playerNumber={index + 1}
+              card={card}
+              isRevealed={revealed[index]}
+              isWinner={winner === index && allRevealed}
+              onReveal={() => handleReveal(index)}
+              dealDelay={index * 80}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Round history */}
+      {history.length > 0 && (
+        <div className="mt-10 sm:mt-14">
+          <h3
+            className="text-center text-sm font-bold uppercase tracking-widest mb-4"
+            style={{ color: "rgba(212, 175, 55, 0.6)" }}
+          >
+            Historial de Rondas
+          </h3>
+          <div className="flex flex-wrap justify-center gap-2">
+            {history.map((result, i) => (
+              <div
+                key={i}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-black/25 border border-white/5
+                  flex items-center gap-2"
+                style={{ color: "rgba(240, 230, 210, 0.6)" }}
+              >
+                <span className="opacity-50">R{result.round}</span>
+                <span style={{ color: "rgba(240, 208, 96, 0.9)" }}>
+                  Jugador {result.winner}
+                </span>
+                <span>
+                  {result.card.rank}
+                  {result.card.suit === "hearts"
+                    ? "♥"
+                    : result.card.suit === "diamonds"
+                      ? "♦"
+                      : result.card.suit === "clubs"
+                        ? "♣"
+                        : "♠"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
