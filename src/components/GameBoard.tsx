@@ -24,6 +24,7 @@ export default function GameBoard() {
   const [roundNumber, setRoundNumber] = useState(0);
   const [dealKey, setDealKey] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
   const confettiFired = useRef(false);
 
   const allRevealed = revealed.length > 0 && revealed.every(Boolean);
@@ -79,17 +80,25 @@ export default function GameBoard() {
   }, [allRevealed, cards, roundNumber]);
 
   const handleDeal = useCallback(() => {
-    const dealt = dealCards(playerCount);
-    setCards(dealt);
-    setRevealed(new Array(playerCount).fill(false));
+    if (isShuffling) return;
+
+    setIsShuffling(true);
+    setIsDealt(false);
     setWinners([]);
     setIsTie(false);
     setShowPopup(false);
-    setIsDealt(true);
     confettiFired.current = false;
-    setRoundNumber((prev) => prev + 1);
-    setDealKey((prev) => prev + 1);
-  }, [playerCount]);
+
+    setTimeout(() => {
+      const dealt = dealCards(playerCount);
+      setCards(dealt);
+      setRevealed(new Array(playerCount).fill(false));
+      setIsDealt(true);
+      setIsShuffling(false);
+      setRoundNumber((prev) => prev + 1);
+      setDealKey((prev) => prev + 1);
+    }, 1200);
+  }, [playerCount, isShuffling]);
 
   const handleReveal = useCallback(
     (index: number) => {
@@ -162,13 +171,15 @@ export default function GameBoard() {
         <div className="flex gap-3">
           <button
             onClick={handleDeal}
-            className="btn-pulse px-6 py-2.5 rounded-xl font-bold text-sm sm:text-base
-              bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-700
-              text-black shadow-lg hover:from-yellow-400 hover:to-yellow-600
-              active:scale-95 transition-all duration-200
-              border border-yellow-400/50"
+            disabled={isShuffling}
+            className={`btn-pulse px-6 py-2.5 rounded-xl font-bold text-sm sm:text-base
+              shadow-lg active:scale-95 transition-all duration-200 border
+              ${isShuffling
+                ? "bg-gradient-to-b from-gray-500 to-gray-600 text-gray-300 border-gray-400/50 cursor-not-allowed"
+                : "bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-700 text-black hover:from-yellow-400 hover:to-yellow-600 border-yellow-400/50"
+              }`}
           >
-            🎴 Repartir
+            🎴 {isShuffling ? "Barajeando..." : "Repartir"}
           </button>
 
           {isDealt && !allRevealed && (
@@ -189,7 +200,7 @@ export default function GameBoard() {
       {/* Winner / Tie popup overlay */}
       {showPopup && winners.length > 0 && allRevealed && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
           onClick={() => setShowPopup(false)}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -251,8 +262,45 @@ export default function GameBoard() {
         </div>
       )}
 
+      {/* Shuffling animation */}
+      {isShuffling && (
+        <div className="flex flex-col items-center justify-center py-12 sm:py-20 gap-5">
+          <div className="shuffle-deck relative" style={{ width: 120, height: 168 }}>
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className={`absolute rounded-xl ${
+                  i % 3 === 0
+                    ? "shuffle-card-a"
+                    : i % 3 === 1
+                      ? "shuffle-card-b"
+                      : "shuffle-card-c"
+                }`}
+                style={{
+                  width: 100,
+                  height: 140,
+                  left: 10 + i * 2,
+                  top: i * 2,
+                  background: "linear-gradient(135deg, #1a3a5c 0%, #0f2440 50%, #1a3a5c 100%)",
+                  border: "2px solid #d4af37",
+                  boxShadow: `0 ${2 + i}px ${8 + i * 2}px rgba(0,0,0,0.4)`,
+                  zIndex: i,
+                  animationDelay: `${i * 70}ms`,
+                }}
+              />
+            ))}
+          </div>
+          <p
+            className="text-lg sm:text-xl font-bold tracking-wide animate-pulse"
+            style={{ color: "rgba(240, 208, 96, 0.9)" }}
+          >
+            Barajeando...
+          </p>
+        </div>
+      )}
+
       {/* Game area */}
-      {!isDealt ? (
+      {!isShuffling && !isDealt ? (
         <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
           <div className="text-6xl sm:text-8xl mb-2 select-none">🃏</div>
           <p className="text-lg sm:text-xl font-semibold" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
@@ -262,7 +310,7 @@ export default function GameBoard() {
             La carta más alta gana la ronda
           </p>
         </div>
-      ) : (
+      ) : isDealt ? (
         <div
           key={dealKey}
           className={`grid ${gridCols} gap-1 sm:gap-1.5 justify-items-center max-w-4xl mx-auto`}
@@ -279,7 +327,7 @@ export default function GameBoard() {
             />
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Round history */}
       {history.length > 0 && (

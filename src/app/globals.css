@@ -158,6 +158,50 @@ body::before {
   animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Shuffle animation */
+@keyframes shuffleLeft {
+  0% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-30px) rotate(-8deg); }
+  50% { transform: translateX(0) rotate(0deg) scale(1.03); }
+  75% { transform: translateX(30px) rotate(8deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+@keyframes shuffleRight {
+  0% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(30px) rotate(8deg); }
+  50% { transform: translateX(0) rotate(0deg) scale(1.03); }
+  75% { transform: translateX(-30px) rotate(-8deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+@keyframes shufflePop {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(0.92) rotate(-3deg); }
+  40% { transform: scale(1.06) rotate(2deg); }
+  60% { transform: scale(0.95) rotate(-1deg); }
+  80% { transform: scale(1.03) rotate(1deg); }
+}
+
+@keyframes shuffleFly {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  50% { opacity: 1; transform: translateY(-40px) rotate(15deg) scale(0.8); }
+  100% { opacity: 0; transform: translateY(-80px) rotate(25deg) scale(0.5); }
+}
+
+@keyframes shuffleSpin {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.shuffle-deck {
+  perspective: 800px;
+}
+
+.shuffle-card-a { animation: shuffleLeft 0.35s ease-in-out infinite; }
+.shuffle-card-b { animation: shuffleRight 0.35s ease-in-out infinite; }
+.shuffle-card-c { animation: shufflePop 0.5s ease-in-out infinite; }
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
