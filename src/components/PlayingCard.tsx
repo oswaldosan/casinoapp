@@ -33,8 +33,8 @@ export default function PlayingCard({
     <div
       className={`card-container cursor-pointer deal-animation ${isWinner ? "winner-glow" : ""}`}
       style={{
-        width: "min(187px, 35vw)",
-        height: "min(262px, 49vw)",
+        width: "min(168px, 31vw)",
+        height: "min(236px, 44vw)",
         animationDelay: `${dealDelay}ms`,
       }}
       onClick={onClick}
@@ -94,23 +94,23 @@ export default function PlayingCard({
                 className="absolute top-1.5 left-2 flex flex-col items-center leading-none"
                 style={{ color: suitColor }}
               >
-                <span className="text-lg sm:text-2xl font-extrabold">{card.rank}</span>
-                <span className="text-base sm:text-xl -mt-0.5">{suitSymbol}</span>
+                <span className="text-xl sm:text-3xl font-extrabold">{card.rank}</span>
+                <span className="text-lg sm:text-2xl -mt-0.5">{suitSymbol}</span>
               </div>
 
               {/* Center display */}
               <div className="flex-1 flex items-center justify-center">
                 {isAce ? (
-                  <span className="text-6xl sm:text-7xl select-none" style={{ color: suitColor }}>
+                  <span className="text-7xl sm:text-8xl select-none" style={{ color: suitColor }}>
                     {suitSymbol}
                   </span>
                 ) : isFaceCard ? (
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-4xl sm:text-5xl select-none">
+                    <span className="text-5xl sm:text-6xl select-none">
                       {faceCardEmoji[card.rank]}
                     </span>
                     <span
-                      className="text-2xl sm:text-3xl font-bold"
+                      className="text-3xl sm:text-4xl font-bold"
                       style={{ color: suitColor }}
                     >
                       {suitSymbol}
@@ -118,11 +118,11 @@ export default function PlayingCard({
                   </div>
                 ) : (
                   <span
-                    className="text-5xl sm:text-6xl font-extrabold select-none"
+                    className="text-6xl sm:text-7xl font-extrabold select-none"
                     style={{ color: suitColor }}
                   >
                     {card.rank}
-                    <span className="text-3xl sm:text-4xl">{suitSymbol}</span>
+                    <span className="text-4xl sm:text-5xl">{suitSymbol}</span>
                   </span>
                 )}
               </div>
@@ -132,8 +132,8 @@ export default function PlayingCard({
                 className="absolute bottom-1.5 right-2 flex flex-col items-center leading-none rotate-180"
                 style={{ color: suitColor }}
               >
-                <span className="text-lg sm:text-2xl font-extrabold">{card.rank}</span>
-                <span className="text-base sm:text-xl -mt-0.5">{suitSymbol}</span>
+                <span className="text-xl sm:text-3xl font-extrabold">{card.rank}</span>
+                <span className="text-lg sm:text-2xl -mt-0.5">{suitSymbol}</span>
               </div>
             </>
           )}

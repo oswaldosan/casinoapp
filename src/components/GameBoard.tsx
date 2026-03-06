@@ -23,6 +23,7 @@ export default function GameBoard() {
   const [history, setHistory] = useState<RoundResult[]>([]);
   const [roundNumber, setRoundNumber] = useState(0);
   const [dealKey, setDealKey] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
   const confettiFired = useRef(false);
 
   const allRevealed = revealed.length > 0 && revealed.every(Boolean);
@@ -36,6 +37,7 @@ export default function GameBoard() {
     const tie = winnerIndices.length > 1;
     setWinners(winnerIndices);
     setIsTie(tie);
+    setShowPopup(true);
     confettiFired.current = true;
 
     const topCard = cards[winnerIndices[0]];
@@ -82,6 +84,7 @@ export default function GameBoard() {
     setRevealed(new Array(playerCount).fill(false));
     setWinners([]);
     setIsTie(false);
+    setShowPopup(false);
     setIsDealt(true);
     confettiFired.current = false;
     setRoundNumber((prev) => prev + 1);
@@ -183,51 +186,68 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Winner / Tie banner */}
-      {winners.length > 0 && allRevealed && (
-        <div className="winner-banner mb-6 text-center">
-          {isTie ? (
-            <>
-              <div
-                className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
-                  bg-gradient-to-r from-gray-500 via-gray-400 to-gray-500
-                  text-black shadow-2xl border-2 border-gray-300"
-              >
-                🤝 ¡Empate! 🤝
-              </div>
-              <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
-                Jugadores {winners.map((i) => i + 1).join(", ")} empataron con{" "}
-                {cards[winners[0]]?.rank}{" "}
-                {cards[winners[0]]?.suit === "hearts"
-                  ? "♥"
-                  : cards[winners[0]]?.suit === "diamonds"
-                    ? "♦"
-                    : cards[winners[0]]?.suit === "clubs"
-                      ? "♣"
-                      : "♠"}
-              </p>
-            </>
-          ) : (
-            <>
-              <div
-                className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
-                  bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600
-                  text-black shadow-2xl border-2 border-yellow-300"
-              >
-                🏆 ¡Jugador {winners[0] + 1} Gana! 🏆
-              </div>
-              <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
-                con {cards[winners[0]]?.rank}{" "}
-                {cards[winners[0]]?.suit === "hearts"
-                  ? "♥"
-                  : cards[winners[0]]?.suit === "diamonds"
-                    ? "♦"
-                    : cards[winners[0]]?.suit === "clubs"
-                      ? "♣"
-                      : "♠"}
-              </p>
-            </>
-          )}
+      {/* Winner / Tie popup overlay */}
+      {showPopup && winners.length > 0 && allRevealed && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => setShowPopup(false)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="winner-banner relative z-10 text-center px-8 sm:px-12 py-8 sm:py-10 rounded-3xl shadow-2xl max-w-md mx-4"
+            style={{
+              background: isTie
+                ? "linear-gradient(145deg, #374151, #1f2937)"
+                : "linear-gradient(145deg, #92700a, #5a4106)",
+              border: isTie ? "2px solid #6b7280" : "2px solid #d4af37",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isTie ? (
+              <>
+                <div className="text-5xl sm:text-6xl mb-3">🤝</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+                  ¡Empate!
+                </div>
+                <p className="text-sm sm:text-base" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
+                  Jugadores {winners.map((i) => i + 1).join(", ")} empataron con{" "}
+                  {cards[winners[0]]?.rank}{" "}
+                  {cards[winners[0]]?.suit === "hearts"
+                    ? "♥"
+                    : cards[winners[0]]?.suit === "diamonds"
+                      ? "♦"
+                      : cards[winners[0]]?.suit === "clubs"
+                        ? "♣"
+                        : "♠"}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-5xl sm:text-6xl mb-3">🏆</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+                  ¡Jugador {winners[0] + 1} Gana!
+                </div>
+                <p className="text-sm sm:text-base" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
+                  con {cards[winners[0]]?.rank}{" "}
+                  {cards[winners[0]]?.suit === "hearts"
+                    ? "♥"
+                    : cards[winners[0]]?.suit === "diamonds"
+                      ? "♦"
+                      : cards[winners[0]]?.suit === "clubs"
+                        ? "♣"
+                        : "♠"}
+                </p>
+              </>
+            )}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="mt-5 px-6 py-2 rounded-xl font-bold text-sm
+                bg-white/20 text-white hover:bg-white/30
+                active:scale-95 transition-all duration-200 border border-white/20"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
 
