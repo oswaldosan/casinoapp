@@ -313,7 +313,7 @@ export default function GameBoard() {
       ) : isDealt ? (
         <div
           key={dealKey}
-          className={`grid ${gridCols} gap-1 sm:gap-1.5 justify-items-center max-w-4xl mx-auto`}
+          className={`grid ${gridCols} gap-0 justify-items-center max-w-4xl mx-auto`}
         >
           {cards.map((card, index) => (
             <PlayerSlot

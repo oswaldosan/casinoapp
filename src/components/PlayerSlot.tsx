@@ -21,7 +21,7 @@ export default function PlayerSlot({
   dealDelay = 0,
 }: PlayerSlotProps) {
   return (
-    <div className="flex flex-col items-center gap-2 sm:gap-3">
+    <div className="flex flex-col items-center gap-1">
       <div
         className={`
           px-3 py-1 rounded-full text-xs sm:text-sm font-bold tracking-wide
