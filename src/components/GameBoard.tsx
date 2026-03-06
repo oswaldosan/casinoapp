@@ -245,7 +245,7 @@ export default function GameBoard() {
       ) : (
         <div
           key={dealKey}
-          className={`grid ${gridCols} gap-4 sm:gap-6 justify-items-center max-w-3xl mx-auto`}
+          className={`grid ${gridCols} gap-1 sm:gap-1.5 justify-items-center max-w-4xl mx-auto`}
         >
           {cards.map((card, index) => (
             <PlayerSlot
