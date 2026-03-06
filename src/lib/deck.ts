@@ -53,14 +53,19 @@ export function getSuitColor(suit: Suit): string {
   return suit === "hearts" || suit === "diamonds" ? "#dc2626" : "#1a1a2e";
 }
 
-export function findWinner(cards: (Card | null)[]): number {
+export function findWinners(cards: (Card | null)[]): number[] {
   let maxValue = -1;
-  let winnerIndex = -1;
-  cards.forEach((card, index) => {
+  cards.forEach((card) => {
     if (card && card.value > maxValue) {
       maxValue = card.value;
-      winnerIndex = index;
     }
   });
-  return winnerIndex;
+  if (maxValue === -1) return [];
+  const indices: number[] = [];
+  cards.forEach((card, index) => {
+    if (card && card.value === maxValue) {
+      indices.push(index);
+    }
+  });
+  return indices;
 }

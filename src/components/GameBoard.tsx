@@ -1,21 +1,24 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Card, dealCards, findWinner } from "@/lib/deck";
+import { Card, dealCards, findWinners } from "@/lib/deck";
 import PlayerSlot from "./PlayerSlot";
 import confetti from "canvas-confetti";
 
 interface RoundResult {
   round: number;
-  winner: number;
+  winner: number | null;
+  tiedPlayers: number[];
   card: Card;
+  isTie: boolean;
 }
 
 export default function GameBoard() {
   const [playerCount, setPlayerCount] = useState(6);
   const [cards, setCards] = useState<(Card | null)[]>([]);
   const [revealed, setRevealed] = useState<boolean[]>([]);
-  const [winner, setWinner] = useState<number | null>(null);
+  const [winners, setWinners] = useState<number[]>([]);
+  const [isTie, setIsTie] = useState(false);
   const [isDealt, setIsDealt] = useState(false);
   const [history, setHistory] = useState<RoundResult[]>([]);
   const [roundNumber, setRoundNumber] = useState(0);
@@ -27,47 +30,58 @@ export default function GameBoard() {
   useEffect(() => {
     if (!allRevealed || confettiFired.current) return;
 
-    const winnerIndex = findWinner(cards);
-    if (winnerIndex === -1) return;
+    const winnerIndices = findWinners(cards);
+    if (winnerIndices.length === 0) return;
 
-    setWinner(winnerIndex);
+    const tie = winnerIndices.length > 1;
+    setWinners(winnerIndices);
+    setIsTie(tie);
     confettiFired.current = true;
 
-    const winnerCard = cards[winnerIndex];
-    if (winnerCard) {
+    const topCard = cards[winnerIndices[0]];
+    if (topCard) {
       setHistory((prev) => [
-        { round: roundNumber, winner: winnerIndex + 1, card: winnerCard },
+        {
+          round: roundNumber,
+          winner: tie ? null : winnerIndices[0] + 1,
+          tiedPlayers: tie ? winnerIndices.map((i) => i + 1) : [],
+          card: topCard,
+          isTie: tie,
+        },
         ...prev,
       ].slice(0, 20));
     }
 
-    const duration = 2000;
-    const end = Date.now() + duration;
-    const frame = () => {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.7 },
-        colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.7 },
-        colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    };
-    frame();
+    if (!tie) {
+      const duration = 2000;
+      const end = Date.now() + duration;
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+          colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+          colors: ["#d4af37", "#f0d060", "#fff", "#39ff14"],
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      };
+      frame();
+    }
   }, [allRevealed, cards, roundNumber]);
 
   const handleDeal = useCallback(() => {
     const dealt = dealCards(playerCount);
     setCards(dealt);
     setRevealed(new Array(playerCount).fill(false));
-    setWinner(null);
+    setWinners([]);
+    setIsTie(false);
     setIsDealt(true);
     confettiFired.current = false;
     setRoundNumber((prev) => prev + 1);
@@ -94,7 +108,8 @@ export default function GameBoard() {
     setPlayerCount(count);
     setCards([]);
     setRevealed([]);
-    setWinner(null);
+    setWinners([]);
+    setIsTie(false);
     setIsDealt(false);
     confettiFired.current = false;
   }, []);
@@ -168,26 +183,51 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Winner banner */}
-      {winner !== null && allRevealed && (
+      {/* Winner / Tie banner */}
+      {winners.length > 0 && allRevealed && (
         <div className="winner-banner mb-6 text-center">
-          <div
-            className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
-              bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600
-              text-black shadow-2xl border-2 border-yellow-300"
-          >
-            🏆 ¡Jugador {winner + 1} Gana! 🏆
-          </div>
-          <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
-            con {cards[winner]?.rank}{" "}
-            {cards[winner]?.suit === "hearts"
-              ? "♥"
-              : cards[winner]?.suit === "diamonds"
-                ? "♦"
-                : cards[winner]?.suit === "clubs"
-                  ? "♣"
-                  : "♠"}
-          </p>
+          {isTie ? (
+            <>
+              <div
+                className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
+                  bg-gradient-to-r from-gray-500 via-gray-400 to-gray-500
+                  text-black shadow-2xl border-2 border-gray-300"
+              >
+                🤝 ¡Empate! 🤝
+              </div>
+              <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
+                Jugadores {winners.map((i) => i + 1).join(", ")} empataron con{" "}
+                {cards[winners[0]]?.rank}{" "}
+                {cards[winners[0]]?.suit === "hearts"
+                  ? "♥"
+                  : cards[winners[0]]?.suit === "diamonds"
+                    ? "♦"
+                    : cards[winners[0]]?.suit === "clubs"
+                      ? "♣"
+                      : "♠"}
+              </p>
+            </>
+          ) : (
+            <>
+              <div
+                className="inline-block px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-lg sm:text-2xl font-extrabold
+                  bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600
+                  text-black shadow-2xl border-2 border-yellow-300"
+              >
+                🏆 ¡Jugador {winners[0] + 1} Gana! 🏆
+              </div>
+              <p className="mt-2 text-sm" style={{ color: "rgba(240, 208, 96, 0.7)" }}>
+                con {cards[winners[0]]?.rank}{" "}
+                {cards[winners[0]]?.suit === "hearts"
+                  ? "♥"
+                  : cards[winners[0]]?.suit === "diamonds"
+                    ? "♦"
+                    : cards[winners[0]]?.suit === "clubs"
+                      ? "♣"
+                      : "♠"}
+              </p>
+            </>
+          )}
         </div>
       )}
 
@@ -213,7 +253,7 @@ export default function GameBoard() {
               playerNumber={index + 1}
               card={card}
               isRevealed={revealed[index]}
-              isWinner={winner === index && allRevealed}
+              isWinner={!isTie && winners.includes(index) && allRevealed}
               onReveal={() => handleReveal(index)}
               dealDelay={index * 80}
             />
@@ -239,8 +279,10 @@ export default function GameBoard() {
                 style={{ color: "rgba(240, 230, 210, 0.6)" }}
               >
                 <span className="opacity-50">R{result.round}</span>
-                <span style={{ color: "rgba(240, 208, 96, 0.9)" }}>
-                  Jugador {result.winner}
+                <span style={{ color: result.isTie ? "rgba(180, 180, 180, 0.9)" : "rgba(240, 208, 96, 0.9)" }}>
+                  {result.isTie
+                    ? `Empate (${result.tiedPlayers.join(", ")})`
+                    : `Jugador ${result.winner}`}
                 </span>
                 <span>
                   {result.card.rank}
