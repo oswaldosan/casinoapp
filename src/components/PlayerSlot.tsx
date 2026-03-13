@@ -1,11 +1,11 @@
 "use client";
 
-import { Card } from "@/lib/deck";
+import { AnimalCard } from "@/lib/deck";
 import PlayingCard from "./PlayingCard";
 
 interface PlayerSlotProps {
   playerNumber: number;
-  card: Card | null;
+  card: AnimalCard | null;
   isRevealed: boolean;
   isWinner: boolean;
   onReveal: () => void;
@@ -21,14 +21,14 @@ export default function PlayerSlot({
   dealDelay = 0,
 }: PlayerSlotProps) {
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center">
       <div
         className={`
           px-3 py-1 rounded-full text-xs sm:text-sm font-bold tracking-wide
           transition-all duration-300
           ${isWinner
             ? "bg-gradient-to-r from-yellow-600 to-yellow-400 text-black shadow-lg shadow-yellow-500/30"
-            : "bg-black/30 text-gold-light/80 border border-gold/20"
+            : "bg-black/30 border border-white/10"
           }
         `}
         style={
@@ -53,14 +53,7 @@ export default function PlayerSlot({
           className="text-xs sm:text-sm font-semibold px-2 py-0.5 rounded bg-black/20"
           style={{ color: isWinner ? "#f0d060" : "rgba(240, 230, 210, 0.7)" }}
         >
-          {card.rank}{" "}
-          {card.suit === "hearts"
-            ? "♥"
-            : card.suit === "diamonds"
-              ? "♦"
-              : card.suit === "clubs"
-                ? "♣"
-                : "♠"}
+          {card.emoji} {card.letter}
         </div>
       )}
     </div>

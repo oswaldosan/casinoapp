@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, getSuitSymbol, getSuitColor } from "@/lib/deck";
+import Image from "next/image";
+import { AnimalCard } from "@/lib/deck";
 
 interface PlayingCardProps {
-  card: Card | null;
+  card: AnimalCard | null;
   isRevealed: boolean;
   isWinner: boolean;
   onClick: () => void;
@@ -17,24 +18,12 @@ export default function PlayingCard({
   onClick,
   dealDelay = 0,
 }: PlayingCardProps) {
-  const suitSymbol = card ? getSuitSymbol(card.suit) : "";
-  const suitColor = card ? getSuitColor(card.suit) : "";
-
-  const isFaceCard = card && ["J", "Q", "K"].includes(card.rank);
-  const isAce = card?.rank === "A";
-
-  const faceCardEmoji: Record<string, string> = {
-    J: "🃏",
-    Q: "👑",
-    K: "🤴",
-  };
-
   return (
     <div
       className={`card-container cursor-pointer deal-animation ${isWinner ? "winner-glow" : ""}`}
       style={{
-        width: "min(168px, 31vw)",
-        height: "min(236px, 44vw)",
+        width: "min(205px, 42vw)",
+        height: "min(205px, 42vw)",
         animationDelay: `${dealDelay}ms`,
       }}
       onClick={onClick}
@@ -43,8 +32,8 @@ export default function PlayingCard({
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       aria-label={
         isRevealed && card
-          ? `${card.rank} of ${card.suit}`
-          : "Face-down card — click to reveal"
+          ? `${card.letter} — ${card.animal}`
+          : "Carta oculta — clic para revelar"
       }
     >
       <div className={`card-inner ${isRevealed ? "flipped" : ""}`}>
@@ -52,91 +41,98 @@ export default function PlayingCard({
         <div
           className="card-back flex items-center justify-center"
           style={{
-            background: "linear-gradient(135deg, #1a3a5c 0%, #0f2440 50%, #1a3a5c 100%)",
+            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
             border: "3px solid #d4af37",
             boxShadow: "0 4px 20px rgba(0,0,0,0.4), inset 0 0 30px rgba(0,0,0,0.2)",
+            borderRadius: 16,
           }}
         >
-          <div className="relative w-full h-full flex items-center justify-center p-3">
-            <div
-              className="absolute inset-2 rounded-lg border-2 border-gold/30"
-              style={{
-                background: `repeating-linear-gradient(
-                  45deg,
-                  transparent,
-                  transparent 5px,
-                  rgba(212,175,55,0.08) 5px,
-                  rgba(212,175,55,0.08) 10px
-                )`,
-              }}
+          <div className="relative w-full h-full flex items-center justify-center p-2">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={110}
+              height={110}
+              className="rounded-full object-cover select-none"
+              style={{ filter: "drop-shadow(0 2px 8px rgba(212,175,55,0.4))" }}
+              draggable={false}
+              priority
             />
-            <div className="text-3xl sm:text-4xl z-10 select-none" style={{ color: "#d4af37" }}>
-              🎰
-            </div>
           </div>
         </div>
 
         {/* Front of card */}
         <div
-          className="card-front flex flex-col"
+          className="card-front flex flex-col items-center justify-center gap-1"
           style={{
-            background: `linear-gradient(145deg, #ffffff 0%, #f8f6f0 50%, #f0ece0 100%)`,
-            border: `3px solid ${isWinner ? "#d4af37" : "#ccc"}`,
+            background: card?.bgGradient ?? "#fff",
+            border: `3px solid ${isWinner ? "#d4af37" : card?.color ?? "#ccc"}`,
             boxShadow: isWinner
               ? "0 4px 30px rgba(212,175,55,0.5)"
-              : "0 4px 15px rgba(0,0,0,0.3)",
+              : "0 4px 15px rgba(0,0,0,0.2)",
+            borderRadius: 16,
           }}
         >
-          {card && (
-            <>
-              {/* Top-left rank and suit */}
-              <div
-                className="absolute top-1.5 left-2 flex flex-col items-center leading-none"
-                style={{ color: suitColor }}
-              >
-                <span className="text-xl sm:text-3xl font-extrabold">{card.rank}</span>
-                <span className="text-lg sm:text-2xl -mt-0.5">{suitSymbol}</span>
-              </div>
+          {card && (() => {
+            const starCount = Math.ceil((card.value / 26) * 5);
+            return (
+              <>
+                {/* Top-left letter */}
+                <div
+                  className="absolute top-2 left-2.5 font-extrabold text-xl sm:text-2xl leading-none"
+                  style={{ color: card.color }}
+                >
+                  {card.letter}
+                </div>
 
-              {/* Center display */}
-              <div className="flex-1 flex items-center justify-center">
-                {isAce ? (
-                  <span className="text-7xl sm:text-8xl select-none" style={{ color: suitColor }}>
-                    {suitSymbol}
-                  </span>
-                ) : isFaceCard ? (
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-5xl sm:text-6xl select-none">
-                      {faceCardEmoji[card.rank]}
-                    </span>
+                {/* Power stars (top-right) */}
+                <div className="absolute top-2 right-2.5 flex gap-px">
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <span
-                      className="text-3xl sm:text-4xl font-bold"
-                      style={{ color: suitColor }}
+                      key={i}
+                      className="text-[10px] sm:text-xs select-none"
+                      style={{ color: card.color, opacity: i < starCount ? 1 : 0.2 }}
                     >
-                      {suitSymbol}
+                      ★
                     </span>
-                  </div>
-                ) : (
-                  <span
-                    className="text-6xl sm:text-7xl font-extrabold select-none"
-                    style={{ color: suitColor }}
-                  >
-                    {card.rank}
-                    <span className="text-4xl sm:text-5xl">{suitSymbol}</span>
-                  </span>
-                )}
-              </div>
+                  ))}
+                </div>
 
-              {/* Bottom-right rank and suit (inverted) */}
-              <div
-                className="absolute bottom-1.5 right-2 flex flex-col items-center leading-none rotate-180"
-                style={{ color: suitColor }}
-              >
-                <span className="text-xl sm:text-3xl font-extrabold">{card.rank}</span>
-                <span className="text-lg sm:text-2xl -mt-0.5">{suitSymbol}</span>
-              </div>
-            </>
-          )}
+                {/* Center emoji */}
+                <div className="text-5xl sm:text-6xl select-none">
+                  {card.emoji}
+                </div>
+
+                {/* Animal name */}
+                <div
+                  className="text-xs sm:text-sm font-bold tracking-wide"
+                  style={{ color: card.color }}
+                >
+                  {card.animal}
+                </div>
+
+                {/* Power bar (bottom center) */}
+                <div className="flex gap-0.5 mt-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="text-xs sm:text-sm select-none"
+                    >
+                      {i < starCount ? "⭐" : "☆"}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Bottom-right letter */}
+                <div
+                  className="absolute bottom-2 right-2.5 font-extrabold text-xl sm:text-2xl leading-none rotate-180"
+                  style={{ color: card.color }}
+                >
+                  {card.letter}
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "El Casino del Tío Tiktokero",
-  description: "Juegos de cartas estilo casino — Banquito y más",
+  title: "Tiktokero Games — Banquito",
+  description: "Juego de cartas con animales — Banquito",
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Card, dealCards, findWinners } from "@/lib/deck";
+import { AnimalCard, dealCards, findWinners } from "@/lib/deck";
 import PlayerSlot from "./PlayerSlot";
 import confetti from "canvas-confetti";
 
@@ -9,13 +9,13 @@ interface RoundResult {
   round: number;
   winner: number | null;
   tiedPlayers: number[];
-  card: Card;
+  card: AnimalCard;
   isTie: boolean;
 }
 
 export default function GameBoard() {
   const [playerCount, setPlayerCount] = useState(6);
-  const [cards, setCards] = useState<(Card | null)[]>([]);
+  const [cards, setCards] = useState<(AnimalCard | null)[]>([]);
   const [revealed, setRevealed] = useState<boolean[]>([]);
   const [winners, setWinners] = useState<number[]>([]);
   const [isTie, setIsTie] = useState(false);
@@ -139,10 +139,8 @@ export default function GameBoard() {
     <div className="w-full max-w-5xl mx-auto px-4 pb-12 relative z-10">
       {/* Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8">
-        {/* Player count selector */}
         <div className="flex items-center gap-3">
           <label
-            htmlFor="player-count"
             className="text-sm font-semibold"
             style={{ color: "rgba(240, 208, 96, 0.9)" }}
           >
@@ -167,7 +165,6 @@ export default function GameBoard() {
           </div>
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-3">
           <button
             onClick={handleDeal}
@@ -179,7 +176,7 @@ export default function GameBoard() {
                 : "bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-700 text-black hover:from-yellow-400 hover:to-yellow-600 border-yellow-400/50"
               }`}
           >
-            🎴 {isShuffling ? "Barajeando..." : "Repartir"}
+            🔀 {isShuffling ? "Mezclando..." : "Repartir"}
           </button>
 
           {isDealt && !allRevealed && (
@@ -200,7 +197,7 @@ export default function GameBoard() {
       {/* Winner / Tie popup overlay */}
       {showPopup && winners.length > 0 && allRevealed && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
+          className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setShowPopup(false)}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -222,14 +219,7 @@ export default function GameBoard() {
                 </div>
                 <p className="text-sm sm:text-base" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
                   Jugadores {winners.map((i) => i + 1).join(", ")} empataron con{" "}
-                  {cards[winners[0]]?.rank}{" "}
-                  {cards[winners[0]]?.suit === "hearts"
-                    ? "♥"
-                    : cards[winners[0]]?.suit === "diamonds"
-                      ? "♦"
-                      : cards[winners[0]]?.suit === "clubs"
-                        ? "♣"
-                        : "♠"}
+                  {cards[winners[0]]?.emoji} {cards[winners[0]]?.letter} — {cards[winners[0]]?.animal}
                 </p>
               </>
             ) : (
@@ -239,14 +229,7 @@ export default function GameBoard() {
                   ¡Jugador {winners[0] + 1} Gana!
                 </div>
                 <p className="text-sm sm:text-base" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
-                  con {cards[winners[0]]?.rank}{" "}
-                  {cards[winners[0]]?.suit === "hearts"
-                    ? "♥"
-                    : cards[winners[0]]?.suit === "diamonds"
-                      ? "♦"
-                      : cards[winners[0]]?.suit === "clubs"
-                        ? "♣"
-                        : "♠"}
+                  con {cards[winners[0]]?.emoji} {cards[winners[0]]?.letter} — {cards[winners[0]]?.animal}
                 </p>
               </>
             )}
@@ -265,11 +248,11 @@ export default function GameBoard() {
       {/* Shuffling animation */}
       {isShuffling && (
         <div className="flex flex-col items-center justify-center py-12 sm:py-20 gap-5">
-          <div className="shuffle-deck relative" style={{ width: 120, height: 168 }}>
+          <div className="shuffle-deck relative" style={{ width: 120, height: 120 }}>
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className={`absolute rounded-xl ${
+                className={`absolute ${
                   i % 3 === 0
                     ? "shuffle-card-a"
                     : i % 3 === 1
@@ -278,11 +261,12 @@ export default function GameBoard() {
                 }`}
                 style={{
                   width: 100,
-                  height: 140,
+                  height: 100,
                   left: 10 + i * 2,
                   top: i * 2,
-                  background: "linear-gradient(135deg, #1a3a5c 0%, #0f2440 50%, #1a3a5c 100%)",
+                  background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
                   border: "2px solid #d4af37",
+                  borderRadius: 16,
                   boxShadow: `0 ${2 + i}px ${8 + i * 2}px rgba(0,0,0,0.4)`,
                   zIndex: i,
                   animationDelay: `${i * 70}ms`,
@@ -294,7 +278,7 @@ export default function GameBoard() {
             className="text-lg sm:text-xl font-bold tracking-wide animate-pulse"
             style={{ color: "rgba(240, 208, 96, 0.9)" }}
           >
-            Barajeando...
+            Mezclando...
           </p>
         </div>
       )}
@@ -302,12 +286,12 @@ export default function GameBoard() {
       {/* Game area */}
       {!isShuffling && !isDealt ? (
         <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
-          <div className="text-6xl sm:text-8xl mb-2 select-none">🃏</div>
+          <div className="text-6xl sm:text-8xl mb-2 select-none">🦁</div>
           <p className="text-lg sm:text-xl font-semibold" style={{ color: "rgba(240, 208, 96, 0.8)" }}>
             Selecciona jugadores y haz clic en Repartir
           </p>
           <p className="text-sm" style={{ color: "rgba(240, 230, 210, 0.5)" }}>
-            La carta más alta gana la ronda
+            La letra más alta gana la ronda
           </p>
         </div>
       ) : isDealt ? (
@@ -353,14 +337,7 @@ export default function GameBoard() {
                     : `Jugador ${result.winner}`}
                 </span>
                 <span>
-                  {result.card.rank}
-                  {result.card.suit === "hearts"
-                    ? "♥"
-                    : result.card.suit === "diamonds"
-                      ? "♦"
-                      : result.card.suit === "clubs"
-                        ? "♣"
-                        : "♠"}
+                  {result.card.emoji} {result.card.letter}
                 </span>
               </div>
             ))}
