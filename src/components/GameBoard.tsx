@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { AnimalCard, dealCards, findWinners } from "@/lib/deck";
+import { AnimalCard, ANIMAL_CARDS, dealCards, findWinners } from "@/lib/deck";
 import PlayerSlot from "./PlayerSlot";
 import confetti from "canvas-confetti";
 
@@ -312,6 +312,46 @@ export default function GameBoard() {
           ))}
         </div>
       ) : null}
+
+      {/* Letter scale reference */}
+      {isDealt && (
+        <div className="mt-6 sm:mt-8">
+          <p
+            className="text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2"
+            style={{ color: "rgba(212, 175, 55, 0.5)" }}
+          >
+            Menor → Mayor
+          </p>
+          <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5 max-w-3xl mx-auto">
+            {ANIMAL_CARDS.map((ac) => {
+              const inPlay = cards.some((c) => c?.letter === ac.letter);
+              const isWinningCard = allRevealed && winners.length > 0 && cards[winners[0]]?.letter === ac.letter;
+              return (
+                <div
+                  key={ac.letter}
+                  className={`
+                    flex flex-col items-center rounded-lg px-1 py-0.5 sm:px-1.5 sm:py-1 transition-all duration-300
+                    ${isWinningCard
+                      ? "ring-2 ring-yellow-400 scale-110 bg-yellow-400/20"
+                      : inPlay
+                        ? "bg-white/15 scale-105"
+                        : "bg-white/5 opacity-40"
+                    }
+                  `}
+                >
+                  <span className="text-[10px] select-none">{ac.emoji}</span>
+                  <span
+                    className="text-[10px] sm:text-xs font-extrabold leading-none"
+                    style={{ color: inPlay ? ac.color : "rgba(255,255,255,0.4)" }}
+                  >
+                    {ac.letter}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Round history */}
       {history.length > 0 && (

@@ -11,7 +11,7 @@ export interface AnimalCard {
   bgGradient: string;
 }
 
-const ANIMAL_CARDS: AnimalCard[] = [
+export const ANIMAL_CARDS: AnimalCard[] = [
   { letter: "A", animal: "Águila",       emoji: "🦅", value: 1,  color: "#b91c1c", bgGradient: "linear-gradient(135deg, #fecaca, #fca5a5)" },
   { letter: "B", animal: "Búfalo",       emoji: "🦬", value: 2,  color: "#92400e", bgGradient: "linear-gradient(135deg, #fde68a, #fbbf24)" },
   { letter: "C", animal: "Cocodrilo",    emoji: "🐊", value: 3,  color: "#166534", bgGradient: "linear-gradient(135deg, #bbf7d0, #86efac)" },
