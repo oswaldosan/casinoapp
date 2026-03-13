@@ -324,7 +324,7 @@ export default function GameBoard() {
           </p>
           <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5 max-w-3xl mx-auto">
             {ANIMAL_CARDS.map((ac) => {
-              const inPlay = cards.some((c) => c?.letter === ac.letter);
+              const isRevealed = cards.some((c, i) => c?.letter === ac.letter && revealed[i]);
               const isWinningCard = allRevealed && winners.length > 0 && cards[winners[0]]?.letter === ac.letter;
               return (
                 <div
@@ -333,7 +333,7 @@ export default function GameBoard() {
                     flex flex-col items-center rounded-lg px-1 py-0.5 sm:px-1.5 sm:py-1 transition-all duration-300
                     ${isWinningCard
                       ? "ring-2 ring-yellow-400 scale-110 bg-yellow-400/20"
-                      : inPlay
+                      : isRevealed
                         ? "bg-white/15 scale-105"
                         : "bg-white/5 opacity-40"
                     }
@@ -342,7 +342,7 @@ export default function GameBoard() {
                   <span className="text-[10px] select-none">{ac.emoji}</span>
                   <span
                     className="text-[10px] sm:text-xs font-extrabold leading-none"
-                    style={{ color: inPlay ? ac.color : "rgba(255,255,255,0.4)" }}
+                    style={{ color: isRevealed ? ac.color : "rgba(255,255,255,0.4)" }}
                   >
                     {ac.letter}
                   </span>
