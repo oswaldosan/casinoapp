@@ -40,18 +40,24 @@ export const ANIMAL_CARDS: AnimalCard[] = [
   { letter: "Z", animal: "Zorro",        emoji: "🦊", value: 26, color: "#dc2626", bgGradient: "linear-gradient(135deg, #fecaca, #f87171)" },
 ];
 
+function cryptoRandom(): number {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0] / (0xFFFFFFFF + 1);
+}
+
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(cryptoRandom() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
 }
 
 export function dealCards(count: number): AnimalCard[] {
-  const doublePool = [...ANIMAL_CARDS, ...ANIMAL_CARDS];
-  const shuffled = shuffleArray(doublePool);
+  const pool = [...ANIMAL_CARDS, ...ANIMAL_CARDS];
+  const shuffled = shuffleArray(shuffleArray(pool));
   return shuffled.slice(0, count);
 }
 

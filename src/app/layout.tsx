@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tiktokero Games — Banquito",
-  description: "Juego de cartas con animales — Banquito",
+  title: "Tiktokero Games",
+  description: "Juegos de cartas y letras — Tiktokero Games",
 };
 
 export default function RootLayout({
