@@ -145,56 +145,56 @@ export default function CardGameBoard() {
       <div className="flex flex-col md:flex-row gap-6 items-start">
 
         {/* Controls - panel izquierdo */}
-        <div className="flex flex-col gap-4 shrink-0 md:pt-4">
-          <div className="flex flex-col gap-2">
-            <label
-              className="text-xs font-semibold uppercase tracking-widest"
-              style={{ color: "rgba(240, 208, 96, 0.7)" }}
+        <div className="flex flex-col items-center gap-2 shrink-0 md:pt-4">
+          <label
+            className="text-xs font-semibold uppercase tracking-widest mb-1"
+            style={{ color: "rgba(240, 208, 96, 0.7)" }}
+          >
+            J
+          </label>
+          {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <button
+              key={n}
+              onClick={() => handlePlayerCountChange(n)}
+              className={`
+                w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200
+                ${playerCount === n
+                  ? "bg-gradient-to-b from-yellow-500 to-yellow-700 text-black shadow-lg scale-110"
+                  : "bg-black/30 text-white/70 hover:bg-black/50 hover:text-white border border-white/10"
+                }
+              `}
             >
-              Jugadores
-            </label>
-            <div className="flex flex-wrap gap-1">
-              {[2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => handlePlayerCountChange(n)}
-                  className={`
-                    w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200
-                    ${playerCount === n
-                      ? "bg-gradient-to-b from-yellow-500 to-yellow-700 text-black shadow-lg scale-110"
-                      : "bg-black/30 text-white/70 hover:bg-black/50 hover:text-white border border-white/10"
-                    }
-                  `}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
+              {n}
+            </button>
+          ))}
+
+          <div className="w-px h-3 bg-white/10 my-1" />
 
           <button
             onClick={handleDeal}
             disabled={isShuffling}
-            className={`btn-pulse w-full px-5 py-2.5 rounded-xl font-bold text-sm
+            title={isShuffling ? "Barajeando..." : "Repartir"}
+            className={`btn-pulse w-9 h-9 rounded-lg font-bold text-base
               shadow-lg active:scale-95 transition-all duration-200 border
               ${isShuffling
                 ? "bg-gradient-to-b from-gray-500 to-gray-600 text-gray-300 border-gray-400/50 cursor-not-allowed"
                 : "bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-700 text-black hover:from-yellow-400 hover:to-yellow-600 border-yellow-400/50"
               }`}
           >
-            🎴 {isShuffling ? "Barajeando..." : "Repartir"}
+            🎴
           </button>
 
           {isDealt && !allRevealed && (
             <button
               onClick={handleRevealAll}
-              className="w-full px-5 py-2.5 rounded-xl font-bold text-sm
+              title="Revelar Todas"
+              className="w-9 h-9 rounded-lg font-bold text-base
                 bg-gradient-to-b from-emerald-600 to-emerald-800
                 text-white shadow-lg hover:from-emerald-500 hover:to-emerald-700
                 active:scale-95 transition-all duration-200
                 border border-emerald-400/30"
             >
-              👁 Revelar Todas
+              👁
             </button>
           )}
         </div>
