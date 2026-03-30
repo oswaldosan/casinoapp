@@ -142,8 +142,9 @@ export default function CardGameBoard() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 pb-12 relative z-10">
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8">
+      {/* Controls - moved below cards, rendered last via flex-col-reverse or reordered */}
+      <div className="flex flex-col-reverse gap-8">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
         <div className="flex items-center gap-3">
           <label
             className="text-sm font-semibold"
@@ -317,6 +318,8 @@ export default function CardGameBoard() {
           ))}
         </div>
       ) : null}
+
+      </div>
 
       {/* Round history */}
       {history.length > 0 && (

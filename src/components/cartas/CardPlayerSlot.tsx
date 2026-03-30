@@ -22,6 +22,14 @@ export default function CardPlayerSlot({
 }: CardPlayerSlotProps) {
   return (
     <div className="flex flex-col items-center gap-1">
+      <TraditionalCard
+        card={card}
+        isRevealed={isRevealed}
+        isWinner={isWinner}
+        onClick={onReveal}
+        dealDelay={dealDelay}
+      />
+
       <div
         className={`
           px-3 py-1 rounded-full text-xs sm:text-sm font-bold tracking-wide
@@ -39,14 +47,6 @@ export default function CardPlayerSlot({
       >
         {isWinner ? `⭐ Jugador ${playerNumber} ⭐` : `Jugador ${playerNumber}`}
       </div>
-
-      <TraditionalCard
-        card={card}
-        isRevealed={isRevealed}
-        isWinner={isWinner}
-        onClick={onReveal}
-        dealDelay={dealDelay}
-      />
 
       {isRevealed && card && (
         <div
