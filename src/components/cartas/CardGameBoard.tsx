@@ -142,40 +142,40 @@ export default function CardGameBoard() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 pb-12 relative z-10">
-      {/* Controls - moved below cards, rendered last via flex-col-reverse or reordered */}
-      <div className="flex flex-col-reverse gap-8">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-        <div className="flex items-center gap-3">
-          <label
-            className="text-sm font-semibold"
-            style={{ color: "rgba(240, 208, 96, 0.9)" }}
-          >
-            Jugadores:
-          </label>
-          <div className="flex gap-1">
-            {[2, 3, 4, 5, 6, 7, 8].map((n) => (
-              <button
-                key={n}
-                onClick={() => handlePlayerCountChange(n)}
-                className={`
-                  w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200
-                  ${playerCount === n
-                    ? "bg-gradient-to-b from-yellow-500 to-yellow-700 text-black shadow-lg scale-110"
-                    : "bg-black/30 text-white/70 hover:bg-black/50 hover:text-white border border-white/10"
-                  }
-                `}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="flex flex-col md:flex-row gap-6 items-start">
 
-        <div className="flex gap-3">
+        {/* Controls - panel izquierdo */}
+        <div className="flex flex-col gap-4 shrink-0 md:pt-4">
+          <div className="flex flex-col gap-2">
+            <label
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "rgba(240, 208, 96, 0.7)" }}
+            >
+              Jugadores
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => handlePlayerCountChange(n)}
+                  className={`
+                    w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200
+                    ${playerCount === n
+                      ? "bg-gradient-to-b from-yellow-500 to-yellow-700 text-black shadow-lg scale-110"
+                      : "bg-black/30 text-white/70 hover:bg-black/50 hover:text-white border border-white/10"
+                    }
+                  `}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button
             onClick={handleDeal}
             disabled={isShuffling}
-            className={`btn-pulse px-6 py-2.5 rounded-xl font-bold text-sm sm:text-base
+            className={`btn-pulse w-full px-5 py-2.5 rounded-xl font-bold text-sm
               shadow-lg active:scale-95 transition-all duration-200 border
               ${isShuffling
                 ? "bg-gradient-to-b from-gray-500 to-gray-600 text-gray-300 border-gray-400/50 cursor-not-allowed"
@@ -188,7 +188,7 @@ export default function CardGameBoard() {
           {isDealt && !allRevealed && (
             <button
               onClick={handleRevealAll}
-              className="px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base
+              className="w-full px-5 py-2.5 rounded-xl font-bold text-sm
                 bg-gradient-to-b from-emerald-600 to-emerald-800
                 text-white shadow-lg hover:from-emerald-500 hover:to-emerald-700
                 active:scale-95 transition-all duration-200
@@ -198,7 +198,6 @@ export default function CardGameBoard() {
             </button>
           )}
         </div>
-      </div>
 
       {/* Winner / Tie popup overlay */}
       {showPopup && winners.length > 0 && allRevealed && (
@@ -250,6 +249,9 @@ export default function CardGameBoard() {
           </div>
         </div>
       )}
+
+        {/* Game area - panel derecho */}
+        <div className="flex-1 min-w-0">
 
       {/* Shuffling animation */}
       {isShuffling && (
@@ -319,7 +321,8 @@ export default function CardGameBoard() {
         </div>
       ) : null}
 
-      </div>
+        </div>{/* end game area */}
+      </div>{/* end flex row */}
 
       {/* Round history */}
       {history.length > 0 && (
