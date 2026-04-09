@@ -15,6 +15,11 @@ const RANK_VALUES: Record<Rank, number> = {
   "8": 8, "9": 9, "10": 10, "J": 11, "Q": 12, "K": 13, "A": 14,
 };
 
+const SHOE_DECKS = 6; // 312 cartas por shoe
+const RESHUFFLE_THRESHOLD = 24;
+
+let shoe: Card[] = [];
+
 function createDeck(): Card[] {
   const deck: Card[] = [];
   for (const suit of SUITS) {
@@ -25,24 +30,65 @@ function createDeck(): Card[] {
   return deck;
 }
 
-function cryptoRandom(): number {
+// Entero aleatorio en [0, max) sin sesgo modular.
+// Usa rejection sampling: descarta valores que caerían en la zona
+// donde 2^32 mod max != 0, eliminando el sesgo por completo.
+function cryptoRandomInt(max: number): number {
+  if (max <= 1) return 0;
   const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  return buf[0] / (0xFFFFFFFF + 1);
+  // Mayor múltiplo de max que cabe en 2^32
+  const maxValid = Math.floor(4294967296 / max) * max;
+  let r: number;
+  do {
+    crypto.getRandomValues(buf);
+    r = buf[0];
+  } while (r >= maxValid);
+  return r % max;
 }
 
-function shuffleDeck(deck: Card[]): Card[] {
-  const shuffled = [...deck];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(cryptoRandom() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+// Fisher-Yates shuffle — una sola pasada es matemáticamente suficiente
+// para generar cualquier permutación con probabilidad uniforme 1/n!
+function shuffle<T>(arr: T[]): T[] {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = cryptoRandomInt(i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return shuffled;
+  return result;
 }
 
+function buildShoe(): Card[] {
+  const allCards: Card[] = [];
+  for (let i = 0; i < SHOE_DECKS; i++) {
+    allCards.push(...createDeck());
+  }
+  return shuffle(allCards);
+}
+
+function getOrRebuildShoe(needed: number): void {
+  if (shoe.length < Math.max(needed, RESHUFFLE_THRESHOLD)) {
+    shoe = buildShoe();
+  }
+}
+
+// Reparte cartas del shoe garantizando que no se repita la misma carta
+// (rank+suit) en una misma ronda. Duplicados del multi-deck se descartan.
+// Las cartas se barajan antes de asignar para romper correlación posicional.
 export function dealCards(count: number): Card[] {
-  const deck = shuffleDeck(shuffleDeck(createDeck()));
-  return deck.slice(0, count);
+  getOrRebuildShoe(count * 2); // margen para posibles duplicados descartados
+  const dealt: Card[] = [];
+  const seen = new Set<string>();
+
+  while (dealt.length < count && shoe.length > 0) {
+    const card = shoe.shift()!;
+    const key = `${card.rank}-${card.suit}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      dealt.push(card);
+    }
+  }
+
+  return shuffle(dealt);
 }
 
 export function getSuitSymbol(suit: Suit): string {
